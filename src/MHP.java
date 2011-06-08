@@ -11,7 +11,8 @@ public class MHP extends DepthFirstVisitor{
 
 	private HashMap<Node, MOL> molSet;
 	
-	public MHP(Node file) {
+	//public MHP(Node file) {
+	public MHP() {
 		molSet = new HashMap<Node, MOL>();
 	}
 	
@@ -26,30 +27,8 @@ public class MHP extends DepthFirstVisitor{
 			return null;
 	}
 	
-	//helper function for MOL
-	public MOL nodeVectorMOL(Vector<Node> v){
-		MOL result = new MOL();
-		Iterator<Node> iter = v.iterator();
-		while(iter.hasNext()){
-			
-			Node temp = iter.next();
-			temp.accept(this);
-
-			MOL tempMOL = getMOL(temp);
-
-			result.L.addAll(tempMOL.L);
-			result.O.addAll(tempMOL.O);
-			result.M.addAll(tempMOL.M);
-			
-			//crossproduct previous O x current L
-			//result.M.addAll(crossProduct(result.O, tempMOL.L);
-		}
-		
-		return result;
-	}
-	
 	//helper for crossproduct
-	public HashSet<Pair <Node, Node>> crossProductM(HashSet<Node> l, HashSet<Node> r){
+	public HashSet<Pair <Node, Node>> crossProduct(HashSet<Node> l, HashSet<Node> r){
 		HashSet<Pair <Node, Node>> result = new HashSet<Pair <Node, Node>>();
 				
 		Iterator<Node> lIter = l.iterator();
@@ -61,14 +40,37 @@ public class MHP extends DepthFirstVisitor{
 				
 				Node rNode = rIter.next();
 				result.add(new Pair<Node, Node>(lNode, rNode));
-				
 			}
-		
 		}
 		
 		return result;
 	}
 	
+	//helper function for MOL
+	public MOL nodeVectorMOL(Vector<Node> v){
+		MOL result = new MOL();
+		Iterator<Node> iter = v.iterator();
+		while(iter.hasNext()){
+			
+			Node temp = iter.next();
+			temp.accept(this);
+
+			MOL tempMOL = getMOL(temp);
+
+			if( tempMOL != null ){	
+				result.M.addAll(tempMOL.M);
+				result.O.addAll(tempMOL.O);
+				result.L.addAll(tempMOL.L);
+			
+				result.M.addAll(crossProduct(result.O, tempMOL.L));		
+			}
+			
+		}
+		
+		return result;
+	}
+	
+
 	@Override
 	public void visit(Assignment n) {
 		
@@ -79,6 +81,34 @@ public class MHP extends DepthFirstVisitor{
 		MOL left = getMOL(n.expression);
 		MOL right = getMOL(n.expression1);
 		
+		HashSet<Pair <Node,Node>> M = new HashSet<Pair <Node, Node>>();
+		HashSet<Node> O = new HashSet<Node>();
+		HashSet<Node> L = new HashSet<Node>();
+
+		//union left.M, right.M, crossproduct right.O and left.L
+		if( left != null ){
+			M.addAll(left.M);
+			O.addAll(left.O);
+			L.addAll(left.L);
+		}
+		
+		if( right != null){
+			M.addAll(right.M);
+			O.addAll(right.O);
+			L.addAll(right.L);
+		}
+		
+		L.add(n); //add your own label
+				
+		MOL assignment = new MOL(M,O,L);
+		molSet.put(n,assignment);
+		
+		/*
+		HashSet<Pair <Node,Node>> M = new HashSet<Pair <Node, Node>>();
+		//union left.M, right.M, crossproduct right.O and left.L
+		M.addAll(left.M);
+		M.addAll(right.M);
+		
 		HashSet<Node> O = new HashSet<Node>();
 		O.addAll(left.O);
 		O.addAll(right.O);
@@ -87,14 +117,10 @@ public class MHP extends DepthFirstVisitor{
 		L.addAll(left.L);
 		L.addAll(right.L);
 		L.add(n); //add your own label
-		
-		HashSet<Pair <Node,Node>> M = new HashSet<Pair <Node, Node>>();
-		//union left.M, right.M, crossproduct right.O and left.L
-		M.addAll(left.M);
-		M.addAll(right.M);
-		
+				
 		MOL assignment = new MOL(M,O,L);
 		molSet.put(n,assignment);
+		*/
 		
 	}
 
@@ -106,6 +132,36 @@ public class MHP extends DepthFirstVisitor{
 		MOL expression = getMOL(n.expression);
 		MOL block = getMOL(n.block);
 		
+		HashSet<Pair <Node, Node>> M = new HashSet<Pair <Node, Node>>();
+		HashSet<Node> O = new HashSet<Node>();
+		HashSet<Node> L = new HashSet<Node>();
+
+		//union expression.M and block.M
+		//expression.O x block.L
+		
+		if( expression != null ){
+			M.addAll(expression.M);
+		}	
+		if( block != null ){
+			M.addAll(block.M);
+			O.addAll(block.O);
+			O.addAll(block.L);
+			L.addAll(block.L);
+		}
+		
+		L.add(n);  // add your own label
+		
+		MOL assignment = new MOL(M,O,L);
+		molSet.put(n,assignment);
+	
+		
+		/*
+		HashSet<Pair <Node, Node>> M = new HashSet<Pair <Node, Node>>();
+		M.addAll(expression.M);
+		M.addAll(block.M);
+		//union expression.M and block.M
+		//expression.O x block.L
+		
 		HashSet<Node> O = new HashSet<Node>();
 		O.addAll(block.O);
 		O.addAll(block.L);
@@ -114,16 +170,9 @@ public class MHP extends DepthFirstVisitor{
 		L.addAll(block.L);
 		L.add(n);  // add your own label
 		
-		HashSet<Pair <Node, Node>> M = new HashSet<Pair <Node, Node>>();
-		M.addAll(expression.M);
-		M.addAll(block.M);
-		
-		//union expression.M and block.M
-		//expression.O x block.L
-		
 		MOL assignment = new MOL(M,O,L);
 		molSet.put(n,assignment);
-		
+		*/
 	}
 
 	@Override
@@ -133,18 +182,33 @@ public class MHP extends DepthFirstVisitor{
 		
 		MOL statement= getMOL(n.statement);
 		
+		HashSet<Pair <Node, Node>> M = new HashSet<Pair <Node, Node>>();
+		HashSet<Node> L = new HashSet<Node>();
+		HashSet<Node> O = new HashSet<Node>();
+
+		if( statement != null ){
+			M.addAll(statement.M);
+			L.addAll(statement.L);
+		}
+		
+		L.add(n); //add yourself
+		
+		MOL assignment = new MOL(M,O,L);
+		molSet.put(n,assignment);
+		
+		/*
+		HashSet<Pair <Node, Node>> M = new HashSet<Pair <Node, Node>>();
+		M.addAll(statement.M);
+		
 		HashSet<Node> L = new HashSet<Node>();
 		L.addAll(statement.L);
 		L.add(n); //add yourself
 		
 		HashSet<Node> O = new HashSet<Node>();
-		
-		HashSet<Pair <Node, Node>> M = new HashSet<Pair <Node, Node>>();
-		M.addAll(statement.M);
-		
+				
 		MOL assignment = new MOL(M,O,L);
-		molSet.put(n,assignment);
-		
+		molSet.put(n,assignment);	
+		*/
 	}
 
 	@Override
@@ -161,6 +225,5 @@ public class MHP extends DepthFirstVisitor{
 		super.visit(n);
 	}
 
-	
 	
 }

@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MOL {
-	public Set<Pair <Node, Node>> M;
-	public Set<Node> O, L;
+	public HashSet<Pair <Node, Node>> M;
+	public HashSet<Node> O, L;
 	
 	public MOL() {
 		M = new HashSet<Pair <Node, Node>>();
