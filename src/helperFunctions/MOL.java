@@ -26,4 +26,14 @@ public class MOL {
 		L = l;
 	}
 	
+	public int hashCode(){return M.hashCode() ^ O.hashCode() ^ L.hashCode();}
+
+	@Override
+	public boolean equals(Object o){
+		if (o == null) return false;
+		if(!(o instanceof MOL)) return false;
+		MOL p = (MOL) o;
+		return 	( M.equals(p.M) && O.equals(p.O) && L.equals(p.L) ); 		
+	}
+	
 }
