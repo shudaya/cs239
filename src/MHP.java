@@ -80,7 +80,7 @@ public class MHP extends DepthFirstVisitor{
 
 		result.M.addAll(left.M);
 		result.M.addAll(right.M);
-		result.M.addAll(crossProduct(left.O,right.L));
+		result.M.addAll(crossProduct(left.O, right.L));
 		
 		result.O.addAll(left.O);
 		result.O.addAll(right.O);
@@ -90,6 +90,12 @@ public class MHP extends DepthFirstVisitor{
 		
 		return result;
 	}
+	
+	@Override
+	public void visit(Statement n) {
+		super.visit(n);
+		molSet.put(n, getMOL(n.nodeChoice.choice));
+	}
 
 	@Override
 	public void visit(Assignment n) {
@@ -98,34 +104,7 @@ public class MHP extends DepthFirstVisitor{
 		
 		MOL result = sequenceMOL(n.expression, n.expression1);
 		result.L.add(n);
-		molSet.put(n,result);
-		
-		/*
-		MOL left = getMOL(n.expression);
-		MOL right = getMOL(n.expression1);
-		
-		HashSet<Pair <Node,Node>> M = new HashSet<Pair <Node, Node>>();
-		HashSet<Node> O = new HashSet<Node>();
-		HashSet<Node> L = new HashSet<Node>();
-
-		//union left.M, right.M, crossproduct s1.0, s2.L
-		if( left != null ){
-			M.addAll(left.M);
-			O.addAll(left.O);
-			L.addAll(left.L);
-		}
-		
-		if( right != null){
-			M.addAll(right.M);
-			O.addAll(right.O);
-			L.addAll(right.L);
-		}
-		
-		L.add(n); //add your own label
-				
-		MOL assignment = new MOL(M,O,L);
-		molSet.put(n,assignment);
-		*/
+		molSet.put(n, result);
 		
 	}
 
@@ -149,9 +128,19 @@ public class MHP extends DepthFirstVisitor{
 		result.L.addAll(block.L);
 		result.L.add(n);
 		
-		molSet.put(n,result);		
+		molSet.put(n, result);		
 	}
 
+	@Override
+	public void visit(Block n) {
+		
+		super.visit(n);	
+		MOL result = nodeVectorMOL(n.nodeListOptional.nodes);
+	
+		molSet.put(n, result);
+	
+	}	
+	
 	@Override
 	public void visit(FinishStatement n) {
 		
@@ -165,25 +154,102 @@ public class MHP extends DepthFirstVisitor{
 		result.L.addAll(statement.L);
 		result.L.add(n);
 		
-		molSet.put(n,result);
+		molSet.put(n, result);
+		
+	}	
+	
+	@Override
+	public void visit(IfStatement n) {
+		super.visit(n);
+					
+		MOL result = sequenceMOL(n.expression, n.statement);
+		MOL expression = getMOL(n.expression);
+		
+		//node optional could be empty
+		if( n.nodeOptional != null ){
+			
+			MOL tempNode = getMOL(n.nodeOptional.node);
+			result.M.addAll(tempNode.M);
+			result.M.addAll(crossProduct(expression.O, tempNode.L));
+			
+			result.O.addAll(tempNode.O);
+			result.L.addAll(tempNode.L);
+		}
+		
+		molSet.put(n, result);
+	}
+
+	@Override
+	public void visit(LoopStatement n) {
+		super.visit(n);
+		
+		MOL expression = getMOL(n.expression);
+		MOL statement = getMOL(n.statement);
+		
+		MOL result = sequenceMOL(n.expression, n.statement);		
+		result.M.addAll(crossProduct(statement.O, expression.L));
+		
+		result.L.add(n);
+		
+		molSet.put(n, result);
 		
 	}
 
 	@Override
-	public void visit(Block n) {
-		
-		super.visit(n);	
-		MOL result = nodeVectorMOL(n.nodeListOptional.nodes);
-	
-		molSet.put(n,result);
-	
+	public void visit(PostfixStatement n) {
+		super.visit(n);
+		molSet.put(n, getMOL(n.expression));
+	}
+
+	@Override
+	public void visit(PrintlnStatement n) {
+		super.visit(n);
+		molSet.put(n, getMOL(n.expression));
 	}
 
 	@Override
 	public void visit(ReturnStatement n) {
-		// TODO Auto-generated method stub
+
 		super.visit(n);
+		//node is optional, it could be null 
+		if( n.nodeOptional != null ){
+			molSet.put(n, getMOL(n.nodeOptional.node));
+		}
+		
 	}
 
+	@Override
+	public void visit(ThrowStatement n) {
+		super.visit(n);
+		molSet.put(n, getMOL(n.expression));
+	}
+
+	@Override
+	public void visit(WhileStatement n) {
+		super.visit(n);
+		
+		MOL result = new MOL();
+		MOL expression = getMOL(n.expression);
+		MOL statement = getMOL(n.statement);
+		
+		result.M.addAll(expression.M);
+		result.M.addAll(statement.M);
 	
+		result.O.addAll(expression.O);
+		result.O.addAll(statement.O);
+		
+		result.L.addAll(expression.L);
+		result.L.addAll(statement.L);
+		
+		//because expression and statement are executed repeatedly
+		result.M.addAll(crossProduct(result.O, result.L));
+		
+		result.L.add(n);
+		
+		molSet.put(n, result);
+
+		
+	}
+	
+		
 }
