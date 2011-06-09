@@ -147,8 +147,6 @@ public class MHP extends DepthFirstVisitor{
 
 
 
-
-
 	@Override
 	public void visit(Statement n) {
 		super.visit(n);
@@ -482,14 +480,16 @@ public class MHP extends DepthFirstVisitor{
 
 	@Override
 	public void visit(ArrayAccess n) {
-		// TODO Auto-generated method stub
 		super.visit(n);
+		MOL result = sequenceMOL(n.primaryExpression, n.expressionList);
+		putMOLforNode(n, result);
 	}
 
 	@Override
 	public void visit(DotMethodCall n) {
 		super.visit(n);
 		Vector<Node> tempVector = new Vector<Node>();
+		tempVector.add(n.primaryExpression);
 		
 		//node optional may be null
 		if( n.nodeOptional.node != null ){			
@@ -518,13 +518,15 @@ public class MHP extends DepthFirstVisitor{
 	@Override
 	public void visit(DotIdentifier n) {
 		super.visit(n);
-		
+		MOL nodeMOL = getMOL(n.primaryExpression);
+		putMOLforNode(n, nodeMOL);
 	}	
 	
 	@Override
 	public void visit(PrimaryExpression n) {
-		// TODO Auto-generated method stub
 		super.visit(n);
+		MOL result = getMOL(n.nodeChoice.choice);
+		putMOLforNode(n, result);
 	}
 
 	@Override
@@ -541,7 +543,6 @@ public class MHP extends DepthFirstVisitor{
 			MOL result = getMOL(n.nodeOptional.node);
 			putMOLforNode(n, result);
 		}
-		
 	}
 	@Override
 	public void visit(NewUpdatableArray n) {
@@ -551,7 +552,6 @@ public class MHP extends DepthFirstVisitor{
 			putMOLforNode(n, result);
 		}
 	}
-
 	@Override
 	public void visit(ExpressionList n) {
 		super.visit(n);
@@ -569,7 +569,6 @@ public class MHP extends DepthFirstVisitor{
 		molSet.put(n, result);
 			
 	}
-
 	@Override
 	public void visit(ArrayInitializer n) {
 		super.visit(n);
