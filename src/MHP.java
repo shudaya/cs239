@@ -94,7 +94,9 @@ public class MHP extends DepthFirstVisitor{
 	@Override
 	public void visit(Statement n) {
 		super.visit(n);
-		molSet.put(n, getMOL(n.nodeChoice.choice));
+		MOL choice = getMOL(n.nodeChoice.choice);
+		MOL result = new MOL(choice);
+		molSet.put(n, result);
 	}
 
 	@Override
@@ -198,13 +200,17 @@ public class MHP extends DepthFirstVisitor{
 	@Override
 	public void visit(PostfixStatement n) {
 		super.visit(n);
-		molSet.put(n, getMOL(n.expression));
+		MOL expression = getMOL(n.expression);
+		MOL result = new MOL(expression);
+		molSet.put(n, result);
 	}
 
 	@Override
 	public void visit(PrintlnStatement n) {
 		super.visit(n);
-		molSet.put(n, getMOL(n.expression));
+		MOL expression = getMOL(n.expression);
+		MOL result = new MOL(expression);
+		molSet.put(n, result);
 	}
 
 	@Override
@@ -213,7 +219,9 @@ public class MHP extends DepthFirstVisitor{
 		super.visit(n);
 		//node is optional, it could be null 
 		if( n.nodeOptional != null ){
-			molSet.put(n, getMOL(n.nodeOptional.node));
+			MOL node = getMOL(n.nodeOptional.node);
+			MOL result = new MOL(node);
+			molSet.put(n, result);
 		}
 		
 	}
@@ -221,7 +229,9 @@ public class MHP extends DepthFirstVisitor{
 	@Override
 	public void visit(ThrowStatement n) {
 		super.visit(n);
-		molSet.put(n, getMOL(n.expression));
+		MOL expression = getMOL(n.expression);
+		MOL result = new MOL(expression);
+		molSet.put(n, result);
 	}
 
 	@Override
@@ -251,5 +261,6 @@ public class MHP extends DepthFirstVisitor{
 		
 	}
 	
-		
+	
+	
 }
