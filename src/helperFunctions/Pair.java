@@ -9,8 +9,6 @@ public class Pair<L, R> {
 		right = r;
 	}
 
-	//hashCode?
-	
 	@Override
 	public boolean equals(Object o){
 		if (o == null) return false;

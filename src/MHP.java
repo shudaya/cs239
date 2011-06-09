@@ -10,6 +10,7 @@ import helperFunctions.*;
 public class MHP extends DepthFirstVisitor{
 
 	private HashMap<Node, MOL> molSet;
+	private HashMap<String, Node> nameSet;
 	
 	//public MHP(Node file) {
 	public MHP() {
@@ -17,6 +18,7 @@ public class MHP extends DepthFirstVisitor{
 	}
 	
 	public HashMap<Node, MOL> getMolSet(){return molSet;}
+	public HashMap<String, Node> getNameSet(){return nameSet;}
 	
 	//get MOL
 	public MOL getMOL(Node n){
@@ -70,6 +72,24 @@ public class MHP extends DepthFirstVisitor{
 		return result;
 	}
 	
+	//helper function for sequence
+	public MOL sequenceMOL(Node l, Node r){
+		MOL result = new MOL();
+		MOL left = getMOL(l);
+		MOL right = getMOL(r);
+
+		result.M.addAll(left.M);
+		result.M.addAll(right.M);
+		result.M.addAll(crossProduct(left.O,right.L));
+		
+		result.O.addAll(left.O);
+		result.O.addAll(right.O);
+		
+		result.L.addAll(left.L);
+		result.L.addAll(right.L);
+		
+		return result;
+	}
 
 	@Override
 	public void visit(Assignment n) {

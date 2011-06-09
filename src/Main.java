@@ -10,7 +10,7 @@ public class Main {
     	 //File root = new MiniX10Parser(System.in).File();
     	 FileInputStream f = null;
     	 try{
-    		 f = new FileInputStream("C:\\Users\\Sendie\\workspace\\cs239\\src\\inputData\\example2.x10");
+    		 f = new FileInputStream("C:\\Users\\William\\workspace\\cs239\\src\\inputData\\example2.x10");
     	 }
     	 catch(Exception e){ System.out.println("File I/O exception");}
     	 File root = new MiniX10Parser(f).File(); 
