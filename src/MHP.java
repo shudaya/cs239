@@ -15,6 +15,7 @@ public class MHP extends DepthFirstVisitor{
 	//public MHP(Node file) {
 	public MHP() {
 		molSet = new HashMap<Node, MOL>();
+		nameSet = new HashMap<String, Node>();
 	}
 	
 	public HashMap<Node, MOL> getMolSet(){return molSet;}
@@ -106,11 +107,9 @@ public class MHP extends DepthFirstVisitor{
 
 	}
 	
-	
 	@Override
 	public void visit(MethodDeclaration n) {
 		super.visit(n);
-		
 		nameSet.put(n.identifier.nodeToken.tokenImage, n);
 		MOL result = getMOL(n.block);
 		if( result != null )
