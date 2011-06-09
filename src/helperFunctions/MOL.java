@@ -14,6 +14,12 @@ public class MOL {
 		L = new HashSet<Node>();
 	}
 
+	public MOL(MOL copy){
+		M = copy.M;
+		O = copy.O;
+		L = copy.L;
+	}
+	
 	public MOL(HashSet<Pair <Node, Node>> m, HashSet<Node> o, HashSet<Node> l) {
 		M = m;
 		O = o;
